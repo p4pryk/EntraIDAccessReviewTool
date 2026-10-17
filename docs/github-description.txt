@@ -1,0 +1,1 @@
+Microsoft Entra ID access review CLI with explicit scope, dry-run previews, confirmed changes and a deterministic offline demo. Python + Microsoft Graph.

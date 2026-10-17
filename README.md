@@ -1,187 +1,114 @@
+![Entra ID Access Review Tool — inspect access, review scope, confirm changes](docs/assets/readme-hero.png)
 
-# Microsoft Entra ID Access Review Tool
+# Entra ID Access Review Tool
 
-**Automate creation and management of Access Reviews in Microsoft Entra ID (Azure AD)**
+**Make directory-role access reviews deliberate, visible and repeatable.**
 
-<img width="556" alt="image" src="https://github.com/user-attachments/assets/685a9485-889f-40cb-9a3f-59924c06f17a" />
+Inspect Microsoft Entra directory roles and assignments, preview a scoped access review, and require explicit confirmation before creating or deleting a review series. A small Python CLI built around Microsoft Graph, least privilege and clear operator control.
 
+[Quick start](#try-the-offline-demo) · [Screenshots](#see-it-in-action) · [Operating guide](docs/operations.md) · [Validation](VALIDATION.md) · [Changelog](CHANGELOG.md)
 
----
+## Why this tool
 
-## Table of Contents
+Privileged access deserves a clear review process. This tool makes the scope and consequences visible before a request reaches Microsoft Graph.
 
-- [Description](#description)  
-- [Prerequisites](#prerequisites)  
-- [Installation](#installation)  
-- [Configuration](#configuration)  
-- [Usage](#usage)  
-- [Available Options](#available-options)  
-- [Project Structure](#project-structure)  
-- [Examples](#examples)  
-- [Troubleshooting](#troubleshooting)  
-- [Best Practices](#best-practices)  
-- [Security Considerations](#security-considerations)  
-- [Contributing](#contributing)  
+| Inspect | Plan | Confirm |
+| --- | --- | --- |
+| List role definitions, direct active assignments and existing reviews. | Target one role, choose active or eligible user assignments, and specify reviewers and a schedule. | Inspect the full plan and type its exact confirmation phrase before a write. |
 
----
+Dry run is the default. Automatic application of decisions, default decisions and email notifications are disabled. The tool does not change role assignments, accounts or group memberships.
 
-## Description
+## Try the offline demo
 
-This console application provides comprehensive management capabilities for Access Reviews of privileged roles in Microsoft Entra ID (formerly Azure AD). Access reviews help organizations efficiently validate and recertify user access, ensuring proper governance and compliance.
-
-### Key Features
-
-- **Role Management**  
-  - List all available roles in your Entra ID tenant  
-  - View detailed information about roles with assigned users  
-
-- **Access Review Creation**  
-  - Create one-time or recurring access reviews  
-  - Configure flexible review schedules (weekly, monthly, quarterly, semi-annual)  
-  - Target specific or all privileged roles  
-
-- **Reviewer Management**  
-  - Assign one or multiple reviewers to conduct access evaluations  
-  - Configure self-review or manager-review options  
-
-- **Review Administration**  
-  - View all existing access reviews with detailed status  
-  - Delete unnecessary or outdated reviews  
-  - Track review progress and compliance  
-
-> The application is built with a clear separation of concerns:  
-> - API integration logic in [`entra_access_review.py`](entra_access_review.py)  
-> - User interface and interaction handling in [`app.py`](app.py)  
-
----
-
-## Prerequisites
-
-- **Python Environment**  
-  - Python 3.8 or higher  
-  - pip package manager  
-
-- **Python Packages**  
-  - `requests` – For API communication with Microsoft Graph  
-  - `colorama` – For enhanced terminal output formatting  
-
-- **Microsoft Entra ID / Azure AD**  
-  - Administrative access to create app registrations  
-  - Privileges to manage access reviews  
-  - A registered application with API permissions  
-
----
-
-## Installation
-
-### 1. Clone the Repository
+**Python 3.11–3.13. No tenant, login or cloud resources needed.**
 
 ```bash
-git clone <repo-url>
-cd EntraIDAccessReview
+git clone https://github.com/p4pryk/EntraIDAccessReviewTool.git
+cd EntraIDAccessReviewTool
+python -m venv .venv
 ```
 
----
+Activate the environment:
 
-## Configuration
-
-### App Registration Configuration
-
-Before using this tool, you need to create an app registration in the Microsoft Entra admin center:
-
-1. Navigate to **Microsoft Entra admin center > App registrations > New registration**  
-2. Provide a name for your application (e.g., `EntraIDAccessReviewTool`)  
-3. Select supported account types (Single tenant is recommended)  
-4. Click **Register**  
-5. Note down:  
-   - Application (client) ID  
-   - Directory (tenant) ID  
-6. Under **Certificates & secrets**, create a new client secret and note its value  
-
-### Required API Permissions
-
-Add the following Microsoft Graph API permissions:
-
-- `RoleManagement.ReadWrite.Directory`  
-- `AccessReview.ReadWrite.All`  
-
-Make sure to grant **admin consent** for these permissions.
-
-### Application Configuration
-
-Update authentication values in `app.py`:
-
-```python
-AZURE_TENANT_ID = "<Your tenant ID>"
-AZURE_CLIENT_ID = "<Your client ID>"
-AZURE_CLIENT_SECRET = "<Your client secret>"
+```bash
+# macOS / Linux
+source .venv/bin/activate
 ```
-
-Alternatively, set these as environment variables:
 
 ```powershell
-# Windows (PowerShell)
-$env:AZURE_TENANT_ID="<Your tenant ID>"
-$env:AZURE_CLIENT_ID="<Your client ID>"
-$env:AZURE_CLIENT_SECRET="<Your client secret>"
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
 ```
 
 ```bash
-# macOS/Linux
-export AZURE_TENANT_ID="<Your tenant ID>"
-export AZURE_CLIENT_ID="<Your client ID>"
-export AZURE_CLIENT_SECRET="<Your client secret>"
+python -m pip install -r requirements.txt
+python app.py --demo roles
+python examples/demo.py
 ```
 
----
+The walkthrough runs the actual CLI through a complete fictional lifecycle: inspect → preview → confirm creation → inspect the result → preview deletion → confirm deletion. It shares an in-memory fixture across commands and resets on exit. Its date is fixed for reproducibility.
 
-## Usage
+## See it in action
 
-To launch the application:
+### Inspect roles and assignments
+
+Readable tables keep names, IDs and review status together. Add `--json` to a read command for complete records suitable for scripts.
+
+![Actual offline CLI output showing role definitions, principal assignment IDs and an existing review](docs/assets/inventory.png)
 
 ```bash
-python app.py
+python app.py --demo reviews
+python app.py --demo roles --json
+python app.py --demo assignments --role 11111111-1111-4111-8111-111111111111
 ```
 
-After launching, you'll see an interactive menu that allows you to navigate through various access review management functions.
+### Preview the change
 
----
+The summary exposes the target tenant, scope, schedule and safeguards. The complete payload follows it. `--apply` asks for a confirmation phrase bound to that specific plan; a wrong phrase sends no write.
 
-## Available Options
+![Offline access review preview with eligible-user scope, quarterly schedule, disabled automatic decisions and full payload](docs/assets/change-preview.png)
 
-The tool provides the following options:
+```bash
+python app.py --demo create \
+  --role 11111111-1111-4111-8111-111111111111 \
+  --reviewer 44444444-4444-4444-8444-444444444444 \
+  --assignment eligible --frequency quarterly --dry-run
+```
 
-1. **List all roles**  
-2. **List roles with assigned users**  
-3. **Create access reviews for privileged roles**  
-4. **Create access reviews for selected roles**  
-5. **Create access reviews with custom schedule**  
-6. **View or delete existing access reviews**  
-7. **Set custom reviewer(s)**  
-0. **Exit**
+All images render captured output from the real offline CLI. They contain fictional data. The preview image separates the summary and payload for readability; it does not represent a web UI. [Full walkthrough transcript](examples/demo-transcript.txt) · [Reproduce the images](docs/visuals.md).
 
----
+## Built for careful operations
 
-## Project Structure
+- **Minimum permissions:** directory-role inspection uses `RoleManagement.Read.Directory`; access-review reads use `AccessReview.Read.All`. Writes require `AccessReview.ReadWrite.All`.
+- **Bounded network behavior:** timeouts, guarded pagination and limited throttling retries. Ambiguous writes are not automatically replayed.
+- **Explicit changes:** one role per creation, explicit reviewer UUIDs, dry runs and exact confirmation. Deletion previews the entire review series and checks for changes before sending the request.
+- **Credential hygiene:** credentials come from the process environment; errors omit remote response bodies and secrets. Remote text is escaped for terminal display.
+- **Offline verification:** deterministic fixtures, unit tests, subprocess tests and a real loopback HTTP simulator cover the main lifecycle and failure paths.
 
-| File | Description |
-|------|-------------|
-| `app.py` | Main CLI interface and menu |
-| `entra_access_review.py` | Core logic and API communication |
-| `__pycache__` | Compiled Python bytecode (auto-generated) |
+For live setup, permission details, supported scopes and schedules, see the [operating guide](docs/operations.md). Reviewer existence and independence remain the operator's responsibility. Service principals, group expansion and Azure resource RBAC are outside the review scopes implemented here.
 
-### Key Functions
+## Validation and project status
 
-| File | Function | Description |
-|------|----------|-------------|
-| `entra_access_review.py` | `get_access_token()` | Authenticates with Graph API |
-| `entra_access_review.py` | `get_directory_roles()` | Retrieves directory roles |
-| `entra_access_review.py` | `get_role_members(role_id)` | Gets members for a role |
-| `entra_access_review.py` | `create_access_review(...)` | Creates a new review |
-| `entra_access_review.py` | `list_access_reviews()` | Lists all reviews |
-| `entra_access_review.py` | `delete_access_review(review_id)` | Deletes a review |
-| `app.py` | `display_menu()` | Shows the interactive menu |
-| `app.py` | `handle_option(choice)` | Handles user selections |
+**82 tests passed locally on Python 3.11, 3.12 and 3.13.** The suite blocks unexpected network access. CI is configured for Linux and Windows, with lint, coverage, dependency audit and secret scanning.
 
----
+Read-only live checks with an existing delegated user token also confirmed role-definition and direct-assignment reads. Access-review listing returned HTTP 403 in that authentication context; review reads, writes and the app-only authentication flow remain unverified. No tenant configuration or access data was changed. GitHub-hosted results are available in the pull request checks and the [Actions history](https://github.com/p4pryk/EntraIDAccessReviewTool/actions/workflows/ci.yml). The [validation record](VALIDATION.md) documents the checks, boundaries and remaining acceptance work.
 
+```bash
+python -m pip install -r requirements-dev.txt
+python -m ruff check .
+python -m ruff format --check .
+python -m pytest --cov=app --cov=entra_access_review --cov-fail-under=90
+```
+
+## Project structure
+
+```text
+app.py                  CLI, readable output and change confirmation
+entra_access_review.py  Graph client, payloads, plans and offline fixture client
+examples/               Fictional data and complete demo walkthrough
+tests/                  Unit, CLI and loopback HTTP integration tests
+docs/                   Operating guide and reproducible README visuals
+.github/workflows/      CI checks; no tenant secrets required
+```
+
+The implementation stays focused on access governance. It adds no LLM dependency or paid infrastructure. See [CHANGELOG.md](CHANGELOG.md) for the migration from the original menu-based version.
