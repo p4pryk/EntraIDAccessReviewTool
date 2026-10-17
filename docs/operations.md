@@ -46,7 +46,7 @@ AZURE_CLIENT_ID=<application UUID>
 AZURE_CLIENT_SECRET=<secret value>
 ```
 
-Never put credentials in source, command arguments, screenshots or transcripts. `.env` files are ignored but are **not loaded** automatically. The token remains in process memory; there is no token cache or credential file. Keep a short-lived secret and rotate it through your organization's process. Certificate/managed-identity authentication is not implemented. An expired token produces a clear error; rerun the command to authenticate again.
+Never put credentials in source, command arguments, screenshots or transcripts. `.env` files are ignored but are **not loaded** automatically. The token remains in process memory; there is no token cache or credential file. Keep a short-lived secret and rotate it through your organization's process. An expired token produces a clear error; rerun the command to authenticate again.
 
 Tenant access-review licensing and feature availability are also required. Microsoft describes licensing for groups/apps separately from Entra role reviews; confirm the current entitlement for your tenant in the [access reviews overview](https://learn.microsoft.com/en-us/entra/id-governance/access-reviews-overview). A successful token is not proof that review creation is licensed or authorized.
 
@@ -66,7 +66,7 @@ Automatic application of decisions, default decisions, email notifications and r
 
 - Connect/read timeouts: 5/30 seconds for authentication and Graph calls.
 - Pagination follows `@odata.nextLink`, rejects cycles and fails at 100 pages rather than returning partial results as complete.
-- Only the exact global Graph HTTPS origin and `/v1.0/` paths may receive the token. Redirects and unsafe next links are rejected. Sovereign clouds are not configured.
+- Only the exact global Graph HTTPS origin and `/v1.0/` paths may receive the token. Redirects and unsafe next links are rejected. The configured cloud is Microsoft Graph global.
 - At most three attempts: explicit HTTP 429 responses respect `Retry-After` (seconds or HTTP date); GET also retries 502/503/504. Missing/invalid delay uses bounded backoff. Delays above 30 seconds cause an error instead of retrying too soon.
 - Writes are never replayed after network errors or 5xx. Their outcome can be unknown: inspect the review list before retrying to avoid duplicate creation. Authentication is not retried.
 - Errors expose HTTP status and a safe hint, not remote response bodies, tokens, exception URLs or client secrets. JSON output escapes terminal controls from remote names.
@@ -87,7 +87,7 @@ gitleaks git . --redact --no-banner
 
 Tests block unexpected network calls. Unit tests cover payloads, UUIDs, pagination, token-origin isolation, redirects, retries, safe errors, confirmation and stale delete plans. An integration test sends real HTTP to a loopback Graph simulator through an explicitly injected transport and exercises the CLI dry run/create/details/delete lifecycle. Subprocess smoke tests check deterministic demo output without Azure environment variables.
 
-CI runs tests on Python 3.11–3.13 on Linux and Windows, checks formatting, audits runtime dependencies and scans Git history with Gitleaks. CI requires no tenant secrets. Local validation details and remaining acceptance work are in [VALIDATION.md](../VALIDATION.md). Dependency ranges allow security updates; CI resolves fresh dependencies, so installations are not a fully locked environment.
+CI runs tests on Python 3.11–3.13 on Linux and Windows, checks formatting, audits runtime dependencies and scans Git history with Gitleaks. CI requires no tenant secrets. Recorded test results are in [VALIDATION.md](../VALIDATION.md). Dependency ranges allow security updates; CI resolves fresh dependencies, so installations are not a fully locked environment.
 
 ## Graph references
 
@@ -99,4 +99,4 @@ Verified against official Microsoft documentation on 2026-10-17:
 
 ## Migration from the original menu
 
-The old numbered interactive menu and token-taking helper functions have been replaced by explicit subcommands and a single Graph client. Scripts importing the old functions must migrate. Unverified broad-scope creation, silent empty-list failures, automatic decision application, static privilege classification and directory object lookups were removed to keep the tool small and its claims precise.
+The old numbered interactive menu and token-taking helper functions have been replaced by explicit subcommands and a single Graph client. Scripts importing the old functions must migrate. Each command now uses the shared Graph client, an explicit scope and consistent error handling. Select one role and explicit reviewers when planning a review.

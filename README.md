@@ -85,13 +85,13 @@ All images render captured output from the real offline CLI. They contain fictio
 - **Credential hygiene:** credentials come from the process environment; errors omit remote response bodies and secrets. Remote text is escaped for terminal display.
 - **Offline verification:** deterministic fixtures, unit tests, subprocess tests and a real loopback HTTP simulator cover the main lifecycle and failure paths.
 
-For live setup, permission details, supported scopes and schedules, see the [operating guide](docs/operations.md). Reviewer existence and independence remain the operator's responsibility. Service principals, group expansion and Azure resource RBAC are outside the review scopes implemented here.
+The tool reviews user assignments to Microsoft Entra directory roles. The [operating guide](docs/operations.md) covers authentication, minimum permissions, reviewer selection and supported schedules.
 
-## Validation and project status
+## Tested across Linux and Windows
 
-**82 tests passed locally on Python 3.11, 3.12 and 3.13.** The suite blocks unexpected network access. CI is configured for Linux and Windows, with lint, coverage, dependency audit and secret scanning.
+**82 automated tests pass on Python 3.11, 3.12 and 3.13, with 98.80% statement coverage.** GitHub Actions also checks code quality, runtime dependency advisories and secrets.
 
-Read-only live checks with an existing delegated user token also confirmed role-definition and direct-assignment reads. Access-review listing returned HTTP 403 in that authentication context; review reads, writes and the app-only authentication flow remain unverified. No tenant configuration or access data was changed. GitHub-hosted results are available in the pull request checks and the [Actions history](https://github.com/p4pryk/EntraIDAccessReviewTool/actions/workflows/ci.yml). The [validation record](VALIDATION.md) documents the checks, boundaries and remaining acceptance work.
+The test suite exercises the review lifecycle against a local HTTP Graph simulator, including pagination, throttling, exact confirmation and failure handling. Live read-only checks additionally verified directory-role definitions and direct assignments. See the [test results](VALIDATION.md) and [CI runs](https://github.com/p4pryk/EntraIDAccessReviewTool/actions/workflows/ci.yml).
 
 ```bash
 python -m pip install -r requirements-dev.txt
@@ -111,4 +111,4 @@ docs/                   Operating guide and reproducible README visuals
 .github/workflows/      CI checks; no tenant secrets required
 ```
 
-The implementation stays focused on access governance. It adds no LLM dependency or paid infrastructure. See [CHANGELOG.md](CHANGELOG.md) for the migration from the original menu-based version.
+The implementation focuses on access governance with a small Python codebase. See [CHANGELOG.md](CHANGELOG.md) for the migration from the original menu-based version.
