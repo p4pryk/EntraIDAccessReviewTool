@@ -1,0 +1,327 @@
+
+$ python app.py --demo roles
+ENTRA ID ACCESS REVIEW | DEMO / NO NETWORK
+
+ROLE                      ROLE ID
+------------------------  ------------------------------------
+Demo Security Reader      11111111-1111-4111-8111-111111111111
+Demo Privileged Operator  22222222-2222-4222-8222-222222222222
+
+2 result(s). Use --json for complete records.
+
+$ python app.py --demo assignments --role 11111111-1111-4111-8111-111111111111
+ENTRA ID ACCESS REVIEW | DEMO / NO NETWORK
+
+Direct active assignments; principal names/types are not resolved.
+
+PRINCIPAL ID                          DIRECTORY SCOPE
+------------------------------------  ---------------
+77777777-7777-4777-8777-777777777777  /
+
+1 result(s). Use --json for complete records.
+
+$ python app.py --demo create --role 11111111-1111-4111-8111-111111111111 --reviewer 44444444-4444-4444-8444-444444444444
+ENTRA ID ACCESS REVIEW | DEMO / NO NETWORK
+
+CHANGE PREVIEW — create one review
+  Target       Review: Demo Security Reader
+  Tenant       DEMO \u2014 fictional tenant
+  Scope        /roleManagement/directory/roleDefinitions/11111111-1111-4111-8111-111111111111
+  Schedule     One-time / starts 2026-10-17
+  Duration     7 days per review
+  Reviewers    1 explicit user(s)
+  Safeguards   Auto-apply OFF / default decision OFF / email OFF
+  Confirmation POST 860d068b8c27
+
+Full change plan:
+{
+  "tenant": "DEMO \u2014 fictional tenant",
+  "method": "POST",
+  "path": "/identityGovernance/accessReviews/definitions",
+  "payload": {
+    "displayName": "Review: Demo Security Reader",
+    "descriptionForAdmins": "Review all user assignments to Demo Security Reader.",
+    "descriptionForReviewers": "Validate continued need for Demo Security Reader access.",
+    "scope": {
+      "@odata.type": "#microsoft.graph.accessReviewQueryScope",
+      "query": "/roleManagement/directory/roleDefinitions/11111111-1111-4111-8111-111111111111",
+      "queryType": "MicrosoftGraph"
+    },
+    "reviewers": [
+      {
+        "query": "/users/44444444-4444-4444-8444-444444444444",
+        "queryType": "MicrosoftGraph"
+      }
+    ],
+    "settings": {
+      "mailNotificationsEnabled": false,
+      "reminderNotificationsEnabled": false,
+      "justificationRequiredOnApproval": true,
+      "defaultDecisionEnabled": false,
+      "instanceDurationInDays": 7,
+      "autoApplyDecisionsEnabled": false,
+      "recommendationsEnabled": true,
+      "recurrence": {
+        "range": {
+          "type": "endDate",
+          "startDate": "2026-10-17",
+          "endDate": "2026-10-24"
+        }
+      }
+    }
+  }
+}
+DRY RUN: no change sent. Use --apply to preview again and confirm.
+
+$ python app.py --demo create --role 11111111-1111-4111-8111-111111111111 --reviewer 44444444-4444-4444-8444-444444444444 --apply
+ENTRA ID ACCESS REVIEW | DEMO / NO NETWORK
+
+CHANGE PREVIEW — create one review
+  Target       Review: Demo Security Reader
+  Tenant       DEMO \u2014 fictional tenant
+  Scope        /roleManagement/directory/roleDefinitions/11111111-1111-4111-8111-111111111111
+  Schedule     One-time / starts 2026-10-17
+  Duration     7 days per review
+  Reviewers    1 explicit user(s)
+  Safeguards   Auto-apply OFF / default decision OFF / email OFF
+  Confirmation POST 860d068b8c27
+
+Full change plan:
+{
+  "tenant": "DEMO \u2014 fictional tenant",
+  "method": "POST",
+  "path": "/identityGovernance/accessReviews/definitions",
+  "payload": {
+    "displayName": "Review: Demo Security Reader",
+    "descriptionForAdmins": "Review all user assignments to Demo Security Reader.",
+    "descriptionForReviewers": "Validate continued need for Demo Security Reader access.",
+    "scope": {
+      "@odata.type": "#microsoft.graph.accessReviewQueryScope",
+      "query": "/roleManagement/directory/roleDefinitions/11111111-1111-4111-8111-111111111111",
+      "queryType": "MicrosoftGraph"
+    },
+    "reviewers": [
+      {
+        "query": "/users/44444444-4444-4444-8444-444444444444",
+        "queryType": "MicrosoftGraph"
+      }
+    ],
+    "settings": {
+      "mailNotificationsEnabled": false,
+      "reminderNotificationsEnabled": false,
+      "justificationRequiredOnApproval": true,
+      "defaultDecisionEnabled": false,
+      "instanceDurationInDays": 7,
+      "autoApplyDecisionsEnabled": false,
+      "recommendationsEnabled": true,
+      "recurrence": {
+        "range": {
+          "type": "endDate",
+          "startDate": "2026-10-17",
+          "endDate": "2026-10-24"
+        }
+      }
+    }
+  }
+}
+Type exactly POST 860d068b8c27 to apply this plan to the displayed tenant.
+> POST 860d068b8c27
+DEMO: simulated change; discarded on exit.
+{
+  "displayName": "Review: Demo Security Reader",
+  "descriptionForAdmins": "Review all user assignments to Demo Security Reader.",
+  "descriptionForReviewers": "Validate continued need for Demo Security Reader access.",
+  "scope": {
+    "@odata.type": "#microsoft.graph.accessReviewQueryScope",
+    "query": "/roleManagement/directory/roleDefinitions/11111111-1111-4111-8111-111111111111",
+    "queryType": "MicrosoftGraph"
+  },
+  "reviewers": [
+    {
+      "query": "/users/44444444-4444-4444-8444-444444444444",
+      "queryType": "MicrosoftGraph"
+    }
+  ],
+  "settings": {
+    "mailNotificationsEnabled": false,
+    "reminderNotificationsEnabled": false,
+    "justificationRequiredOnApproval": true,
+    "defaultDecisionEnabled": false,
+    "instanceDurationInDays": 7,
+    "autoApplyDecisionsEnabled": false,
+    "recommendationsEnabled": true,
+    "recurrence": {
+      "range": {
+        "type": "endDate",
+        "startDate": "2026-10-17",
+        "endDate": "2026-10-24"
+      }
+    }
+  },
+  "id": "dddddddd-dddd-4ddd-8ddd-000000000001",
+  "status": "NotStarted"
+}
+
+$ python app.py --demo reviews
+ENTRA ID ACCESS REVIEW | DEMO / NO NETWORK
+
+REVIEW                        STATUS      REVIEW ID
+----------------------------  ----------  ------------------------------------
+Demo quarterly access review  InProgress  33333333-3333-4333-8333-333333333333
+Review: Demo Security Reader  NotStarted  dddddddd-dddd-4ddd-8ddd-000000000001
+
+2 result(s). Use --json for complete records.
+
+$ python app.py --demo details dddddddd-dddd-4ddd-8ddd-000000000001
+ENTRA ID ACCESS REVIEW | DEMO / NO NETWORK
+
+{
+  "displayName": "Review: Demo Security Reader",
+  "descriptionForAdmins": "Review all user assignments to Demo Security Reader.",
+  "descriptionForReviewers": "Validate continued need for Demo Security Reader access.",
+  "scope": {
+    "@odata.type": "#microsoft.graph.accessReviewQueryScope",
+    "query": "/roleManagement/directory/roleDefinitions/11111111-1111-4111-8111-111111111111",
+    "queryType": "MicrosoftGraph"
+  },
+  "reviewers": [
+    {
+      "query": "/users/44444444-4444-4444-8444-444444444444",
+      "queryType": "MicrosoftGraph"
+    }
+  ],
+  "settings": {
+    "mailNotificationsEnabled": false,
+    "reminderNotificationsEnabled": false,
+    "justificationRequiredOnApproval": true,
+    "defaultDecisionEnabled": false,
+    "instanceDurationInDays": 7,
+    "autoApplyDecisionsEnabled": false,
+    "recommendationsEnabled": true,
+    "recurrence": {
+      "range": {
+        "type": "endDate",
+        "startDate": "2026-10-17",
+        "endDate": "2026-10-24"
+      }
+    }
+  },
+  "id": "dddddddd-dddd-4ddd-8ddd-000000000001",
+  "status": "NotStarted",
+  "instances": []
+}
+
+$ python app.py --demo delete dddddddd-dddd-4ddd-8ddd-000000000001
+ENTRA ID ACCESS REVIEW | DEMO / NO NETWORK
+
+CHANGE PREVIEW — delete entire review series
+  Target       Review: Demo Security Reader
+  Tenant       DEMO \u2014 fictional tenant
+  Effect       Delete the entire review series and its definition.
+  Confirmation DELETE f18359d7cd40
+
+Full change plan:
+{
+  "tenant": "DEMO \u2014 fictional tenant",
+  "method": "DELETE",
+  "path": "/identityGovernance/accessReviews/definitions/dddddddd-dddd-4ddd-8ddd-000000000001",
+  "target": {
+    "displayName": "Review: Demo Security Reader",
+    "descriptionForAdmins": "Review all user assignments to Demo Security Reader.",
+    "descriptionForReviewers": "Validate continued need for Demo Security Reader access.",
+    "scope": {
+      "@odata.type": "#microsoft.graph.accessReviewQueryScope",
+      "query": "/roleManagement/directory/roleDefinitions/11111111-1111-4111-8111-111111111111",
+      "queryType": "MicrosoftGraph"
+    },
+    "reviewers": [
+      {
+        "query": "/users/44444444-4444-4444-8444-444444444444",
+        "queryType": "MicrosoftGraph"
+      }
+    ],
+    "settings": {
+      "mailNotificationsEnabled": false,
+      "reminderNotificationsEnabled": false,
+      "justificationRequiredOnApproval": true,
+      "defaultDecisionEnabled": false,
+      "instanceDurationInDays": 7,
+      "autoApplyDecisionsEnabled": false,
+      "recommendationsEnabled": true,
+      "recurrence": {
+        "range": {
+          "type": "endDate",
+          "startDate": "2026-10-17",
+          "endDate": "2026-10-24"
+        }
+      }
+    },
+    "id": "dddddddd-dddd-4ddd-8ddd-000000000001",
+    "status": "NotStarted"
+  }
+}
+DRY RUN: no change sent. Use --apply to preview again and confirm.
+
+$ python app.py --demo delete dddddddd-dddd-4ddd-8ddd-000000000001 --apply
+ENTRA ID ACCESS REVIEW | DEMO / NO NETWORK
+
+CHANGE PREVIEW — delete entire review series
+  Target       Review: Demo Security Reader
+  Tenant       DEMO \u2014 fictional tenant
+  Effect       Delete the entire review series and its definition.
+  Confirmation DELETE f18359d7cd40
+
+Full change plan:
+{
+  "tenant": "DEMO \u2014 fictional tenant",
+  "method": "DELETE",
+  "path": "/identityGovernance/accessReviews/definitions/dddddddd-dddd-4ddd-8ddd-000000000001",
+  "target": {
+    "displayName": "Review: Demo Security Reader",
+    "descriptionForAdmins": "Review all user assignments to Demo Security Reader.",
+    "descriptionForReviewers": "Validate continued need for Demo Security Reader access.",
+    "scope": {
+      "@odata.type": "#microsoft.graph.accessReviewQueryScope",
+      "query": "/roleManagement/directory/roleDefinitions/11111111-1111-4111-8111-111111111111",
+      "queryType": "MicrosoftGraph"
+    },
+    "reviewers": [
+      {
+        "query": "/users/44444444-4444-4444-8444-444444444444",
+        "queryType": "MicrosoftGraph"
+      }
+    ],
+    "settings": {
+      "mailNotificationsEnabled": false,
+      "reminderNotificationsEnabled": false,
+      "justificationRequiredOnApproval": true,
+      "defaultDecisionEnabled": false,
+      "instanceDurationInDays": 7,
+      "autoApplyDecisionsEnabled": false,
+      "recommendationsEnabled": true,
+      "recurrence": {
+        "range": {
+          "type": "endDate",
+          "startDate": "2026-10-17",
+          "endDate": "2026-10-24"
+        }
+      }
+    },
+    "id": "dddddddd-dddd-4ddd-8ddd-000000000001",
+    "status": "NotStarted"
+  }
+}
+Type exactly DELETE f18359d7cd40 to apply this plan to the displayed tenant.
+> DELETE f18359d7cd40
+DEMO: simulated change; discarded on exit.
+
+$ python app.py --demo reviews
+ENTRA ID ACCESS REVIEW | DEMO / NO NETWORK
+
+REVIEW                        STATUS      REVIEW ID
+----------------------------  ----------  ------------------------------------
+Demo quarterly access review  InProgress  33333333-3333-4333-8333-333333333333
+
+1 result(s). Use --json for complete records.
+
+Demo complete: one fictional review remains. No network or tenant changes.
